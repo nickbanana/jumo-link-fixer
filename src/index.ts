@@ -10,7 +10,7 @@ app.get('/', (c) => {
   // 獲取 Secret（已成功）
   const apiKey = c.env.BROWSERBASE_API_KEY;
 
-  return c.text('HELLO here and there');
+  return c.text('NOW it can CI/CD !');
 })
 
 app.get('*', (c) => {
