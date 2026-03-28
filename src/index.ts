@@ -1,21 +1,34 @@
-import { Hono } from 'hono'
+import { Hono } from 'hono';
+import type { Bindings } from './types';
+import { instagramHandler } from './platforms/instagram';
+import { xHandler } from './platforms/x';
+import { threadsHandler } from './platforms/threads';
+import { facebookHandler } from './platforms/facebook';
 
-type Bindings = {
-  BROWSERBASE_API_KEY: string;
-}
+const app = new Hono<{ Bindings: Bindings }>();
 
-const app = new Hono<{Bindings: Bindings}>()
+app.get('/', (c) => c.text('Jumo Link Fixer is running.'));
+app.get('/favicon.ico', () => new Response(null, { status: 204 }));
 
-app.get('/', (c) => {
-  // 獲取 Secret（已成功）
-  const apiKey = c.env.BROWSERBASE_API_KEY;
+app.get('/*', async (c) => {
+    const host = c.req.header('Host');
+    if (!host) {
+        return c.text('Host header is missing.', 400);
+    }
 
-  return c.text('NOW it can CI/CD !');
-})
+    const path = new URL(c.req.url).pathname;
+    const platformKey = c.env.ENVIRONMENT === 'dev'
+        ? path.split('/').filter(p => p)[0]
+        : host.split('.')[0];
 
-app.get('*', (c) => {
-  const url = new URL(c.req.url);
-  return c.text(`You requested the path: ${url.pathname}`);
-})
+    switch (platformKey) {
+        case 'instagram': return instagramHandler(c);
+        case 'x':
+        case 'twitter':  return xHandler(c);
+        case 'threads':  return threadsHandler(c);
+        case 'facebook': return facebookHandler(c);
+        default: return c.text(`Platform "${platformKey}" is not supported.`, 404);
+    }
+});
 
-export default app
+export default app;
