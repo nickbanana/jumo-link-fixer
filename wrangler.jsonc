@@ -9,13 +9,26 @@
       "pattern": "*.jumo.dev/*",
       "zone_id": "90ca6b1933f110bb11d87d4f0a66e0b7"
     }
-  ]
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
+  ],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "ENVIRONMENT": "dev",
+    "BROWSERBASE_FUNCTION_ID": "YOUR_FUNCTION_ID_HERE"
+  },
+  "env": {
+    "staging": {
+      "vars": {
+        "ENVIRONMENT": "staging"
+      }
+    },
+    "production": {
+      "vars": {
+        "ENVIRONMENT": "production"
+      }
+    }
+  },
   // "kv_namespaces": [
   //   {
   //     "binding": "MY_KV_NAMESPACE",
