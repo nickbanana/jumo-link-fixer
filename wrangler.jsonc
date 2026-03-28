@@ -20,12 +20,14 @@
   "env": {
     "staging": {
       "vars": {
-        "ENVIRONMENT": "staging"
+        "ENVIRONMENT": "staging",
+        "BROWSERBASE_FUNCTION_ID": "YOUR_FUNCTION_ID_HERE"
       }
     },
     "production": {
       "vars": {
-        "ENVIRONMENT": "production"
+        "ENVIRONMENT": "production",
+        "BROWSERBASE_FUNCTION_ID": "YOUR_FUNCTION_ID_HERE"
       }
     }
   },
