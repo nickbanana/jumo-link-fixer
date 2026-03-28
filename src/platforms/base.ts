@@ -1,11 +1,12 @@
 import type { Context } from 'hono';
-import type { Bindings, BrowserbaseResult } from '../types';
-import { invokeBrowserbase } from '../utils/browserbase';
-import { renderOgHtml, renderErrorHtml } from '../utils/html';
+import type { Bindings } from '../types';
+import { escapeHtml } from '../utils/html';
+import { stripTrackingParams } from '../utils/strip-params';
 
 export type PlatformConfig = {
     key: string;
     domain: string;
+    stripParams?: string[];
 }
 
 export function createPlatformHandler(config: PlatformConfig) {
@@ -17,26 +18,24 @@ export function createPlatformHandler(config: PlatformConfig) {
             ? `/${path.split('/').filter(p => p).slice(1).join('/')}`
             : path;
 
-        const originalUrl = `${config.domain}${actualPath}`;
-        console.log(`[${config.key}] => Fetching content for: ${originalUrl}`);
+        let originalUrl = `${config.domain}${actualPath}${url.search}`;
 
-        const bbResponse = await invokeBrowserbase(
-            c.env.BROWSERBASE_FUNCTION_ID,
-            c.env.BROWSERBASE_API_KEY,
-            { url: originalUrl, platform: config.key }
-        );
-
-        if (!bbResponse.ok) {
-            return c.html(renderErrorHtml(originalUrl, bbResponse.status), 502);
+        if (config.stripParams && config.stripParams.length > 0) {
+            originalUrl = stripTrackingParams(originalUrl, config.stripParams);
         }
 
-        const result = await bbResponse.json() as BrowserbaseResult;
+        console.log(`[${config.key}] => Redirecting to: ${originalUrl}`);
 
-        return c.html(renderOgHtml({
-            title: result.author ? `@${result.author}` : config.key,
-            description: result.content ?? '',
-            url: originalUrl,
-            images: result.links ?? [],
-        }));
+        const escaped = escapeHtml(originalUrl);
+        return c.html(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=${escaped}" />
+</head>
+<body>
+  <p>Redirecting to <a href="${escaped}">${escaped}</a>…</p>
+</body>
+</html>`);
     };
 }
