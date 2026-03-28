@@ -28,7 +28,7 @@
       "vars": {
         "ENVIRONMENT": "production",
         "BROWSERBASE_FUNCTION_ID": "YOUR_FUNCTION_ID_HERE"
-      }
+      },"name": "jumo-link-fixer"
     }
   },
   // "kv_namespaces": [
