@@ -16,10 +16,7 @@ app.get('/*', async (c) => {
         return c.text('Host header is missing.', 400);
     }
 
-    const path = new URL(c.req.url).pathname;
-    const platformKey = c.env.ENVIRONMENT === 'dev'
-        ? path.split('/').filter(p => p)[0]
-        : host.split('.')[0];
+    const platformKey = host.split('.')[0];
 
     switch (platformKey) {
         case 'instagram': return instagramHandler(c);
