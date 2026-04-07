@@ -7,6 +7,7 @@ export type Bindings = {
 export type BrowserbaseResult = {
     content?: string;
     author?: string;
+    username?: string;
     likes?: number;
     links?: string[];
 }

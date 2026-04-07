@@ -11,16 +11,20 @@ export function renderOgHtml(params: {
     description: string;
     url: string;
     images: string[];
+    redirectUrl?: string;
 }): string {
-    const { title, description, url, images } = params;
+    const { title, description, url, images, redirectUrl } = params;
     const imageTags = images.map(img =>
         `  <meta property="og:image" content="${escapeHtml(img)}" />`
     ).join('\n');
+    const redirect = redirectUrl
+        ? `\n  <meta http-equiv="refresh" content="0; url=${escapeHtml(redirectUrl)}" />`
+        : '';
 
     return `<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" />${redirect}
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${escapeHtml(url)}" />
@@ -28,7 +32,7 @@ ${imageTags}
   <meta property="og:type" content="article" />
 </head>
 <body>
-  <p>${escapeHtml(description)}</p>
+  <p>Redirecting to <a href="${escapeHtml(redirectUrl ?? url)}">${escapeHtml(redirectUrl ?? url)}</a>…</p>
 </body>
 </html>`;
 }

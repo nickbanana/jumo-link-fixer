@@ -15,19 +15,14 @@
   ],
   "vars": {
     "ENVIRONMENT": "dev",
-    "BROWSERBASE_FUNCTION_ID": "YOUR_FUNCTION_ID_HERE"
+    "BROWSERBASE_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071"
   },
   "env": {
-    "staging": {
-      "vars": {
-        "ENVIRONMENT": "staging",
-        "BROWSERBASE_FUNCTION_ID": "YOUR_FUNCTION_ID_HERE"
-      }
-    },
     "production": {
+      "name": "jumo-link-fixer",
       "vars": {
         "ENVIRONMENT": "production",
-        "BROWSERBASE_FUNCTION_ID": "YOUR_FUNCTION_ID_HERE"
+        "BROWSERBASE_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071"
       }
     }
   },
