@@ -15,14 +15,22 @@
   ],
   "vars": {
     "ENVIRONMENT": "dev",
-    "BROWSERBASE_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071"
+    "FUNCTION_MODE": "remote",
+    "JUMO_X_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071",
+    "JUMO_IG_FUNCTION_ID": "",
+    "JUMO_THREADS_FUNCTION_ID": "",
+    "JUMO_FB_FUNCTION_ID": ""
   },
   "env": {
     "production": {
       "name": "jumo-link-fixer",
       "vars": {
         "ENVIRONMENT": "production",
-        "BROWSERBASE_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071"
+        "FUNCTION_MODE": "remote",
+        "JUMO_X_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071",
+        "JUMO_IG_FUNCTION_ID": "",
+        "JUMO_THREADS_FUNCTION_ID": "",
+        "JUMO_FB_FUNCTION_ID": ""
       }
     }
   },

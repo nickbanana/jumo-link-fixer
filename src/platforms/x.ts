@@ -21,9 +21,11 @@ export async function xHandler(c: Context<{ Bindings: Bindings }>) {
 
     try {
         const response = await invokeBrowserbase(
-            c.env.BROWSERBASE_FUNCTION_ID,
+            c.env.FUNCTION_MODE,
+            c.env.JUMO_X_FUNCTION_ID,
+            'x',
             c.env.BROWSERBASE_API_KEY,
-            { url: originalUrl },
+            { url: originalUrl, apiKey: c.env.GOOGLE_API_KEY },
         );
 
         if (!response.ok) {
