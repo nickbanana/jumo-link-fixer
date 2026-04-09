@@ -25,6 +25,7 @@ export function renderOgHtml(params: {
 <html>
 <head>
   <meta charset="utf-8" />${redirect}
+  <title>${escapeHtml(title)}</title>
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${escapeHtml(url)}" />
