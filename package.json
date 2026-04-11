@@ -2,7 +2,12 @@
   "name": "jumo-link-fixer",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --host x.jumo.dev",
+    "dev:x": "wrangler dev --host x.jumo.dev",
+    "dev:ig": "wrangler dev --host instagram.jumo.dev",
+    "dev:threads": "wrangler dev --host threads.jumo.dev",
+    "dev:fb": "wrangler dev --host facebook.jumo.dev",
+    "dev:placeholder": "wrangler dev --host placeholder.jumo.dev",
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },

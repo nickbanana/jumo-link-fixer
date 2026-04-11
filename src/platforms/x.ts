@@ -8,7 +8,6 @@ const STRIP_PARAMS = ['s', 't', 'ref_src', 'ref_url', 'utm_*'];
 
 export async function xHandler(c: Context<{ Bindings: Bindings }>) {
     const url = new URL(c.req.url);
-
     let originalUrl = `https://x.com${url.pathname}${url.search}`;
     originalUrl = stripTrackingParams(originalUrl, STRIP_PARAMS);
 
