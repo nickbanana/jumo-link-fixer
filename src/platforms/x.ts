@@ -8,13 +8,8 @@ const STRIP_PARAMS = ['s', 't', 'ref_src', 'ref_url', 'utm_*'];
 
 export async function xHandler(c: Context<{ Bindings: Bindings }>) {
     const url = new URL(c.req.url);
-    const path = url.pathname;
 
-    const actualPath = c.env.ENVIRONMENT === 'dev'
-        ? `/${path.split('/').filter(p => p).slice(1).join('/')}`
-        : path;
-
-    let originalUrl = `https://x.com${actualPath}${url.search}`;
+    let originalUrl = `https://x.com${url.pathname}${url.search}`;
     originalUrl = stripTrackingParams(originalUrl, STRIP_PARAMS);
 
     console.log(`[x] => Fetching metadata for: ${originalUrl}`);

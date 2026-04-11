@@ -12,13 +12,8 @@ export type PlatformConfig = {
 export function createPlatformHandler(config: PlatformConfig) {
     return async (c: Context<{ Bindings: Bindings }>) => {
         const url = new URL(c.req.url);
-        const path = url.pathname;
 
-        const actualPath = c.env.ENVIRONMENT === 'dev'
-            ? `/${path.split('/').filter(p => p).slice(1).join('/')}`
-            : path;
-
-        let originalUrl = `${config.domain}${actualPath}${url.search}`;
+        let originalUrl = `${config.domain}${url.pathname}${url.search}`;
 
         if (config.stripParams && config.stripParams.length > 0) {
             originalUrl = stripTrackingParams(originalUrl, config.stripParams);
