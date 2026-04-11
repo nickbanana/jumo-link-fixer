@@ -4,10 +4,17 @@ import { instagramHandler } from './platforms/instagram';
 import { xHandler } from './platforms/x';
 import { threadsHandler } from './platforms/threads';
 import { facebookHandler } from './platforms/facebook';
+import { placeholderHandler } from './platforms/placeholder';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.get('/', (c) => c.text('Jumo Link Fixer is running.'));
+app.get('/', (c) => {
+    const host = c.req.header('Host');
+    if (host && host.split('.')[0] === 'placeholder') {
+        return placeholderHandler(c);
+    }
+    return c.text('Jumo Link Fixer is running.');
+});
 app.get('/favicon.ico', () => new Response(null, { status: 204 }));
 
 app.get('/*', async (c) => {
@@ -24,6 +31,7 @@ app.get('/*', async (c) => {
         case 'twitter':  return xHandler(c);
         case 'threads':  return threadsHandler(c);
         case 'facebook': return facebookHandler(c);
+        case 'placeholder': return placeholderHandler(c);
         default: return c.text(`Platform "${platformKey}" is not supported.`, 404);
     }
 });
