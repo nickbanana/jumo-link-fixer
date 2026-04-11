@@ -7,8 +7,15 @@ type MetaTag =
     | { kind: 'name'; name: string; content: string };
 
 const SAMPLE_IMAGE = 'https://placehold.co/1200x630/png?text=og-image';
-const SAMPLE_IMAGE_ALT = 'https://placehold.co/600x600/png?text=og-image-alt';
 const SAMPLE_VIDEO = 'https://placehold.co/1280x720.mp4';
+
+const EXTRA_IMAGES: { url: string; width: number; height: number; alt: string }[] = [
+    { url: 'https://placehold.co/600x600/png?text=square', width: 600, height: 600, alt: '正方形 600x600' },
+    { url: 'https://placehold.co/1920x1080/png?text=fullhd', width: 1920, height: 1080, alt: '大張橫向 1920x1080' },
+    { url: 'https://placehold.co/400x800/png?text=portrait', width: 400, height: 800, alt: '直向 400x800' },
+    { url: 'https://placehold.co/1080x1080/png?text=large-square', width: 1080, height: 1080, alt: '大正方形 1080x1080' },
+    { url: 'https://placehold.co/2400x1260/png?text=ultrawide', width: 2400, height: 1260, alt: '超寬 2400x1260' },
+];
 
 const BASIC_OG: MetaTag[] = [
     { kind: 'property', name: 'og:title', content: '[og:title] Placeholder 範例標題' },
@@ -21,16 +28,18 @@ const BASIC_OG: MetaTag[] = [
 ];
 
 function imageAdvancedMeta(): MetaTag[] {
-    return [
-        ...BASIC_OG,
+    const firstImageSubtags: MetaTag[] = [
         { kind: 'property', name: 'og:image:width', content: '1200' },
         { kind: 'property', name: 'og:image:height', content: '630' },
-        { kind: 'property', name: 'og:image:alt', content: '[og:image:alt] 第一張圖片的替代文字' },
-        { kind: 'property', name: 'og:image', content: SAMPLE_IMAGE_ALT },
-        { kind: 'property', name: 'og:image:width', content: '600' },
-        { kind: 'property', name: 'og:image:height', content: '600' },
-        { kind: 'property', name: 'og:image:alt', content: '[og:image:alt] 第二張圖片的替代文字' },
+        { kind: 'property', name: 'og:image:alt', content: '[og:image:alt] 第一張 1200x630 的替代文字' },
     ];
+    const extras: MetaTag[] = EXTRA_IMAGES.flatMap((img, i) => [
+        { kind: 'property' as const, name: 'og:image', content: img.url },
+        { kind: 'property' as const, name: 'og:image:width', content: String(img.width) },
+        { kind: 'property' as const, name: 'og:image:height', content: String(img.height) },
+        { kind: 'property' as const, name: 'og:image:alt', content: `[og:image:alt] 第${i + 2}張 ${img.alt}` },
+    ]);
+    return [...BASIC_OG, ...firstImageSubtags, ...extras];
 }
 
 function twitterCardMeta(): MetaTag[] {
