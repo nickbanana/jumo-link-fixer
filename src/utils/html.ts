@@ -6,19 +6,43 @@ export function escapeHtml(str: string): string {
         .replace(/"/g, '&quot;');
 }
 
+export type OgImage = {
+    url: string;
+    width?: number;
+    height?: number;
+    alt?: string;
+};
+
 export function renderOgHtml(params: {
     title: string;
     description: string;
     url: string;
-    images: string[];
+    images: (string | OgImage)[];
+    siteName?: string;
+    type?: string;
+    locale?: string;
     redirectUrl?: string;
 }): string {
-    const { title, description, url, images, redirectUrl } = params;
-    const imageTags = images.map(img =>
-        `  <meta property="og:image" content="${escapeHtml(img)}" />`
-    ).join('\n');
+    const { title, description, url, images, siteName, type = 'article', locale, redirectUrl } = params;
+    const imageTags = images.map(img => {
+        const o = typeof img === 'string' ? { url: img } : img;
+        const lines = [`  <meta property="og:image" content="${escapeHtml(o.url)}" />`];
+        if (o.width != null)
+            lines.push(`  <meta property="og:image:width" content="${o.width}" />`);
+        if (o.height != null)
+            lines.push(`  <meta property="og:image:height" content="${o.height}" />`);
+        if (o.alt)
+            lines.push(`  <meta property="og:image:alt" content="${escapeHtml(o.alt)}" />`);
+        return lines.join('\n');
+    }).join('\n');
     const redirect = redirectUrl
         ? `\n  <meta http-equiv="refresh" content="0; url=${escapeHtml(redirectUrl)}" />`
+        : '';
+    const siteNameTag = siteName
+        ? `\n  <meta property="og:site_name" content="${escapeHtml(siteName)}" />`
+        : '';
+    const localeTag = locale
+        ? `\n  <meta property="og:locale" content="${escapeHtml(locale)}" />`
         : '';
 
     return `<!DOCTYPE html>
@@ -30,7 +54,7 @@ export function renderOgHtml(params: {
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${escapeHtml(url)}" />
 ${imageTags}
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="${escapeHtml(type)}" />${siteNameTag}${localeTag}
 </head>
 <body>
   <p>Redirecting to <a href="${escapeHtml(redirectUrl ?? url)}">${escapeHtml(redirectUrl ?? url)}</a>…</p>

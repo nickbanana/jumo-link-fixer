@@ -45,6 +45,8 @@ export async function xHandler(c: Context<{ Bindings: Bindings }>) {
             description,
             url: originalUrl,
             images,
+            siteName: 'X',
+            locale: 'zh_TW',
             redirectUrl: originalUrl,
         }));
     } catch (error) {
