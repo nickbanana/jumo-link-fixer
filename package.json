@@ -11,7 +11,7 @@
     "dev:discord": "wrangler dev --host discord.jumo.dev",
     "deploy": "wrangler deploy --minify",
     "generate-types": "wrangler types",
-    "type-check": "generate-types && tsc",
+    "type-check": "npm run generate-types && tsc --noEmit",
     "register:discord": "node scripts/register-commands.mjs"
   },
   "dependencies": {
@@ -19,6 +19,8 @@
     "hono": "^4.9.10"
   },
   "devDependencies": {
+    "@types/node": "^26.0.1",
+    "typescript": "^6.0.3",
     "wrangler": "^4.106.0"
   }
 }
