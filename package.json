@@ -8,13 +8,16 @@
     "dev:threads": "wrangler dev --host threads.jumo.dev",
     "dev:fb": "wrangler dev --host facebook.jumo.dev",
     "dev:placeholder": "wrangler dev --host placeholder.jumo.dev",
+    "dev:discord": "wrangler dev --host discord.jumo.dev",
     "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "register:discord": "node scripts/register-commands.mjs"
   },
   "dependencies": {
+    "discord-interactions": "^4.4.0",
     "hono": "^4.9.10"
   },
   "devDependencies": {
-    "wrangler": "^4.4.0"
+    "wrangler": "^4.106.0"
   }
 }

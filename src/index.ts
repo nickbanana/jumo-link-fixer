@@ -6,6 +6,7 @@ import { xHandler } from './platforms/x';
 import { threadsHandler } from './platforms/threads';
 import { facebookHandler } from './platforms/facebook';
 import { placeholderHandler } from './platforms/placeholder';
+import { discordHandler } from './platforms/discord';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -44,6 +45,13 @@ app.get('/*', async (c) => {
 
     const platformKey = host.split('.')[0];
     return c.text(`Platform "${platformKey}" is not supported.`, 404);
+});
+
+// Discord interactions endpoint（POST）。互動端點 URL 設為 https://discord.jumo.dev/。
+app.post('/*', (c) => {
+    const host = c.req.header('Host');
+    if (host?.split('.')[0] === 'discord') return discordHandler(c);
+    return c.text('Not found', 404);
 });
 
 export default app;

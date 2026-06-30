@@ -7,6 +7,8 @@ export type Bindings = {
     JUMO_THREADS_FUNCTION_ID: string;
     JUMO_FB_FUNCTION_ID: string;
     GOOGLE_API_KEY: string;
+    DISCORD_PUBLIC_KEY: string;
+    DISCORD_APPLICATION_ID: string;
 }
 
 export type BrowserbaseResult = {
