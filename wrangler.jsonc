@@ -66,5 +66,18 @@
       "invocation_logs": true
     },
     "traces": {}
+  },
+  "queues": {
+    "consumers": [
+      {
+        "queue": "jumo-link-queues",
+      }
+    ],
+    "producers": [
+      {
+        "queue": "jumo-link-queues",
+        "binding": "jumo_link_queues"
+      }
+    ]
   }
 }

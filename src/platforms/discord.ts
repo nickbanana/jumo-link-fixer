@@ -1,12 +1,15 @@
 import type { Context } from 'hono';
 import { InteractionType, InteractionResponseType, verifyKey } from 'discord-interactions';
-import type { Bindings, BrowserbaseResult } from '../types';
+import type { Bindings, BrowserbaseResult, PreviewJob } from '../types';
 import { stripTrackingParams } from '../utils/strip-params';
 import { invokeBrowserbase } from '../utils/browserbase';
 import { detectPlatform } from '../utils/platform-detect';
 import { buildEmbeds, buildFallbackEmbed, type DiscordEmbed } from '../utils/discord-embed';
 
 const DISCORD_API = 'https://discord.com/api/v10';
+
+// Browserbase 擷取在 Queue consumer（wall time 最長 15 分鐘）執行，故可長時間輪詢。
+const QUEUE_POLL = { intervalMs: 3000, maxAttempts: 120 }; // 最長約 6 分鐘
 
 // Discord interactions 端點。驗證簽章 → PING/PONG → /preview 指令（deferred + 背景擷取）。
 export async function discordHandler(c: Context<{ Bindings: Bindings }>) {
@@ -33,8 +36,17 @@ export async function discordHandler(c: Context<{ Bindings: Bindings }>) {
         const option = (interaction.data.options ?? []).find((o: { name: string }) => o.name === 'url');
         const rawUrl: string = option?.value ?? '';
 
-        // 背景擷取並編輯原始回應；先回 deferred 讓 Discord 顯示「thinking…」。
-        c.executionCtx.waitUntil(handlePreview(c.env, interaction, rawUrl));
+        // 擷取交給 Queue consumer（wall time 最長 15 分鐘），先回 deferred 顯示「thinking…」。
+        const job: PreviewJob = {
+            applicationId: c.env.DISCORD_APPLICATION_ID || interaction.application_id,
+            token: interaction.token,
+            rawUrl,
+        };
+        try {
+            await c.env.jumo_link_queues.send(job);
+        } catch (error) {
+            console.error('[discord] Failed to enqueue preview job:', error);
+        }
 
         return c.json({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
     }
@@ -42,15 +54,11 @@ export async function discordHandler(c: Context<{ Bindings: Bindings }>) {
     return c.text('unhandled interaction', 400);
 }
 
-async function handlePreview(
-    env: Bindings,
-    interaction: { application_id: string; token: string },
-    rawUrl: string,
-) {
-    const applicationId = env.DISCORD_APPLICATION_ID || interaction.application_id;
-    const editUrl = `${DISCORD_API}/webhooks/${applicationId}/${interaction.token}/messages/@original`;
+// 由 Queue consumer 呼叫：擷取 metadata 並 PATCH 原始（deferred）回覆。
+export async function runPreview(env: Bindings, job: PreviewJob) {
+    const editUrl = `${DISCORD_API}/webhooks/${job.applicationId}/${job.token}/messages/@original`;
 
-    const detected = detectPlatform(rawUrl);
+    const detected = detectPlatform(job.rawUrl);
     if (!detected) {
         await editOriginal(editUrl, { content: '無法辨識此連結的平台，請確認是 X / Instagram / Threads / Facebook 連結。' });
         return;
@@ -71,6 +79,7 @@ async function handlePreview(
                 detected.key,
                 env.BROWSERBASE_API_KEY,
                 { url: originalUrl, apiKey: env.GOOGLE_API_KEY },
+                QUEUE_POLL,
             );
 
             if (!response.ok) {

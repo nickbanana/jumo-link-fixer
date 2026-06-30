@@ -7,18 +7,28 @@ const FUNCTION_NAMES: Record<string, string> = {
 };
 
 // 生產環境為非同步調用：POST 後需輪詢直到 COMPLETED。
-const POLL_INTERVAL_MS = 2000;
-const POLL_MAX_ATTEMPTS = 12; // 約 24 秒上限，Discord deferred 回應允許更久但 Worker 不宜久等
+// 預設約 24 秒，適用於 fetch handler 的 waitUntil（硬上限 30 秒）。
+// 在 Queue consumer（wall time 最長 15 分鐘）可傳入更長的輪詢參數。
+const DEFAULT_POLL_INTERVAL_MS = 2000;
+const DEFAULT_POLL_MAX_ATTEMPTS = 12;
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+export type PollOptions = {
+    intervalMs?: number;
+    maxAttempts?: number;
+};
 
 export async function invokeBrowserbase(
     mode: string,
     functionId: string,
     platform: string,
     apiKey: string,
-    params: { url: string; apiKey?: string }
+    params: { url: string; apiKey?: string },
+    poll: PollOptions = {}
 ): Promise<Response> {
+    const pollIntervalMs = poll.intervalMs ?? DEFAULT_POLL_INTERVAL_MS;
+    const pollMaxAttempts = poll.maxAttempts ?? DEFAULT_POLL_MAX_ATTEMPTS;
     const isLocal = mode === 'local';
     const identifier = isLocal ? FUNCTION_NAMES[platform] : functionId;
     const baseUrl = isLocal ? 'http://127.0.0.1:14113' : 'https://api.browserbase.com';
@@ -57,7 +67,7 @@ export async function invokeBrowserbase(
     }
 
     const pollUrl = `${baseUrl}/v1/functions/invocations/${invocationId}`;
-    for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
+    for (let attempt = 0; attempt < pollMaxAttempts; attempt++) {
         if (invocation?.status === 'COMPLETED') {
             return new Response(JSON.stringify(unwrapResults(invocation.results)), {
                 status: 200,
@@ -69,7 +79,7 @@ export async function invokeBrowserbase(
             return new Response(null, { status: 502 });
         }
 
-        await sleep(POLL_INTERVAL_MS);
+        await sleep(pollIntervalMs);
 
         const pollRes = await fetch(pollUrl, { method: 'GET', headers });
         if (!pollRes.ok) {

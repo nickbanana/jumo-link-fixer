@@ -9,6 +9,14 @@ export type Bindings = {
     GOOGLE_API_KEY: string;
     DISCORD_PUBLIC_KEY: string;
     DISCORD_APPLICATION_ID: string;
+    jumo_link_queues: Queue<PreviewJob>;
+}
+
+// Discord /preview 指令丟進 Queue 的工作內容，由 consumer 擷取後 PATCH 回覆。
+export type PreviewJob = {
+    applicationId: string;
+    token: string;
+    rawUrl: string;
 }
 
 export type BrowserbaseResult = {
