@@ -38,11 +38,8 @@ export async function discordHandler(c: Context<{ Bindings: Bindings }>) {
     if (interaction.type === InteractionType.APPLICATION_COMMAND && interaction.data?.name === 'preview') {
         const options: { name: string; value: unknown }[] = interaction.data.options ?? [];
         const rawUrl: string = options.find((o) => o.name === 'url')?.value as string ?? '';
-        // TODO: 目前 Discord 端指令尚未 register `isspoiler` 選項（見 scripts/register-commands.mjs），
-        // 故此處先 hard code 預設 true 以便本地驗證效果。等 `npm run register:discord` 重新註冊指令後，
-        // 移除下面的 hard code，改回單純讀取 isSpoilerOption（未帶選項時預設 false 即可）。
-        const isSpoilerOption = options.find((o) => o.name === 'isspoiler')?.value;
-        const isSpoiler = isSpoilerOption === undefined ? true : isSpoilerOption === true;
+        // 未帶 `isspoiler` 選項時 value 為 undefined，預設不劇透（與指令註冊描述「預設關閉」一致）。
+        const isSpoiler = options.find((o) => o.name === 'isspoiler')?.value === true;
 
         // 擷取交給 Queue consumer（wall time 最長 15 分鐘），先回 deferred 顯示「thinking…」。
         const job: PreviewJob = {
