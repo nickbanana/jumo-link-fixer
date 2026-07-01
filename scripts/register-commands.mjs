@@ -54,6 +54,12 @@ const commands = [
                 type: 3, // STRING
                 required: true,
             },
+            {
+                name: 'isspoiler',
+                description: '是否以劇透模式隱藏圖片（預設關閉）',
+                type: 5, // BOOLEAN
+                required: false,
+            },
         ],
     },
 ];

@@ -17,6 +17,7 @@ export type PreviewJob = {
     applicationId: string;
     token: string;
     rawUrl: string;
+    isSpoiler?: boolean;
 }
 
 export type BrowserbaseResult = {

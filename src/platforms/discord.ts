@@ -11,6 +11,9 @@ const DISCORD_API = 'https://discord.com/api/v10';
 // Browserbase 擷取在 Queue consumer（wall time 最長 15 分鐘）執行，故可長時間輪詢。
 const QUEUE_POLL = { intervalMs: 3000, maxAttempts: 120 }; // 最長約 6 分鐘
 
+// 擷取不到圖時的預設佔位圖。
+const DEFAULT_IMAGE_URL = 'https://placehold.co/600x400/png';
+
 // Discord interactions 端點。驗證簽章 → PING/PONG → /preview 指令（deferred + 背景擷取）。
 export async function discordHandler(c: Context<{ Bindings: Bindings }>) {
     const signature = c.req.header('X-Signature-Ed25519');
@@ -33,14 +36,20 @@ export async function discordHandler(c: Context<{ Bindings: Bindings }>) {
     }
 
     if (interaction.type === InteractionType.APPLICATION_COMMAND && interaction.data?.name === 'preview') {
-        const option = (interaction.data.options ?? []).find((o: { name: string }) => o.name === 'url');
-        const rawUrl: string = option?.value ?? '';
+        const options: { name: string; value: unknown }[] = interaction.data.options ?? [];
+        const rawUrl: string = options.find((o) => o.name === 'url')?.value as string ?? '';
+        // TODO: 目前 Discord 端指令尚未 register `isspoiler` 選項（見 scripts/register-commands.mjs），
+        // 故此處先 hard code 預設 true 以便本地驗證效果。等 `npm run register:discord` 重新註冊指令後，
+        // 移除下面的 hard code，改回單純讀取 isSpoilerOption（未帶選項時預設 false 即可）。
+        const isSpoilerOption = options.find((o) => o.name === 'isspoiler')?.value;
+        const isSpoiler = isSpoilerOption === undefined ? true : isSpoilerOption === true;
 
         // 擷取交給 Queue consumer（wall time 最長 15 分鐘），先回 deferred 顯示「thinking…」。
         const job: PreviewJob = {
             applicationId: c.env.DISCORD_APPLICATION_ID || interaction.application_id,
             token: interaction.token,
             rawUrl,
+            isSpoiler,
         };
         try {
             await c.env.jumo_link_queues.send(job);
@@ -87,9 +96,15 @@ export async function runPreview(env: Bindings, job: PreviewJob) {
                 embeds = [buildFallbackEmbed(detected.key, originalUrl)];
             } else {
                 const result = await response.json<BrowserbaseResult>();
+
+                // 擷取不到圖時，預設補上佔位圖，確保 embed 除內文外一定有圖。
+                if (!result.links || result.links.length === 0) {
+                    result.links = [DEFAULT_IMAGE_URL];
+                }
+
                 embeds = (!result.content && !result.author)
                     ? [buildFallbackEmbed(detected.key, originalUrl)]
-                    : buildEmbeds(detected.key, originalUrl, result);
+                    : buildEmbeds(detected.key, originalUrl, result, job.isSpoiler);
             }
         }
     } catch (error) {

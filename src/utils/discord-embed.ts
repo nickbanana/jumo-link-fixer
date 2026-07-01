@@ -29,6 +29,7 @@ export function buildEmbeds(
     platformKey: string,
     originalUrl: string,
     result: BrowserbaseResult,
+    isSpoiler = false,
 ): DiscordEmbed[] {
     const label = PLATFORM_LABELS[platformKey] ?? platformKey;
 
@@ -49,6 +50,14 @@ export function buildEmbeds(
 
     const images = result.links ?? [];
     if (images.length === 0) {
+        return [base];
+    }
+
+    // embed 的 image.url 欄位本身不支援劇透標記，僅文字/連結可用 ||…||。
+    // 劇透模式下不直接顯示圖片，改把連結以劇透文字列在 description，需點擊才會顯示。
+    if (isSpoiler) {
+        const spoilerLinks = images.map((img) => `||${img}||`).join('\n');
+        base.description = base.description ? `${base.description}\n\n${spoilerLinks}` : spoilerLinks;
         return [base];
     }
 
