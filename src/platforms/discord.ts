@@ -4,7 +4,7 @@ import type { Bindings, BrowserbaseResult, PreviewJob } from '../types';
 import { stripTrackingParams } from '../utils/strip-params';
 import { invokeBrowserbase } from '../utils/browserbase';
 import { detectPlatform } from '../utils/platform-detect';
-import { buildEmbeds, buildFallbackEmbed, type DiscordEmbed } from '../utils/discord-embed';
+import { buildComponents, buildFallbackComponents, IS_COMPONENTS_V2, type DiscordComponent } from '../utils/discord-embed';
 
 const DISCORD_API = 'https://discord.com/api/v10';
 
@@ -76,11 +76,11 @@ export async function runPreview(env: Bindings, job: PreviewJob) {
     const originalUrl = stripTrackingParams(detected.originalUrl, detected.stripParams);
     const functionId = env[detected.functionIdEnvKey] as string;
 
-    let embeds: DiscordEmbed[];
+    let components: DiscordComponent[];
     try {
-        // 尚未部署 function（id 為空）→ 直接 fallback embed。
+        // 尚未部署 function（id 為空）→ 直接 fallback 內容。
         if (env.FUNCTION_MODE !== 'local' && !functionId) {
-            embeds = [buildFallbackEmbed(detected.key, originalUrl)];
+            components = buildFallbackComponents(detected.key, originalUrl);
         } else {
             const response = await invokeBrowserbase(
                 env.FUNCTION_MODE,
@@ -93,30 +93,30 @@ export async function runPreview(env: Bindings, job: PreviewJob) {
 
             if (!response.ok) {
                 console.error(`[discord] Browserbase invocation failed: ${response.status}`);
-                embeds = [buildFallbackEmbed(detected.key, originalUrl)];
+                components = buildFallbackComponents(detected.key, originalUrl);
             } else {
                 const result = await response.json<BrowserbaseResult>();
 
-                // 擷取不到圖時，預設補上佔位圖，確保 embed 除內文外一定有圖。
+                // 擷取不到圖時，預設補上佔位圖，確保內容除內文外一定有圖。
                 if (!result.links || result.links.length === 0) {
                     result.links = [DEFAULT_IMAGE_URL];
                 }
 
-                embeds = (!result.content && !result.author)
-                    ? [buildFallbackEmbed(detected.key, originalUrl)]
-                    : buildEmbeds(detected.key, originalUrl, result, job.isSpoiler);
+                components = (!result.content && !result.author)
+                    ? buildFallbackComponents(detected.key, originalUrl)
+                    : buildComponents(detected.key, originalUrl, result, job.isSpoiler);
             }
         }
     } catch (error) {
         console.error('[discord] Error:', error);
-        embeds = [buildFallbackEmbed(detected.key, originalUrl)];
+        components = buildFallbackComponents(detected.key, originalUrl);
     }
 
-    await editOriginal(editUrl, { embeds });
+    await editOriginal(editUrl, { components, flags: IS_COMPONENTS_V2 });
 }
 
 // PATCH 原始（deferred）回應內容。
-async function editOriginal(editUrl: string, body: { content?: string; embeds?: DiscordEmbed[] }) {
+async function editOriginal(editUrl: string, body: { content?: string; components?: DiscordComponent[]; flags?: number }) {
     const res = await fetch(editUrl, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
