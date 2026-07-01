@@ -11,9 +11,6 @@ const DISCORD_API = 'https://discord.com/api/v10';
 // Browserbase 擷取在 Queue consumer（wall time 最長 15 分鐘）執行，故可長時間輪詢。
 const QUEUE_POLL = { intervalMs: 3000, maxAttempts: 120 }; // 最長約 6 分鐘
 
-// 擷取不到圖時的預設佔位圖。
-const DEFAULT_IMAGE_URL = 'https://placehold.co/600x400/png';
-
 // Discord interactions 端點。驗證簽章 → PING/PONG → /preview 指令（deferred + 背景擷取）。
 export async function discordHandler(c: Context<{ Bindings: Bindings }>) {
     const signature = c.req.header('X-Signature-Ed25519');
@@ -93,11 +90,6 @@ export async function runPreview(env: Bindings, job: PreviewJob) {
                 components = buildFallbackComponents(detected.key, originalUrl);
             } else {
                 const result = await response.json<BrowserbaseResult>();
-
-                // 擷取不到圖時，預設補上佔位圖，確保內容除內文外一定有圖。
-                if (!result.links || result.links.length === 0) {
-                    result.links = [DEFAULT_IMAGE_URL];
-                }
 
                 components = (!result.content && !result.author)
                     ? buildFallbackComponents(detected.key, originalUrl)

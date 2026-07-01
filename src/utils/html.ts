@@ -18,12 +18,15 @@ export function renderOgHtml(params: {
     description: string;
     url: string;
     images: (string | OgImage)[];
+    videos?: string[];
     siteName?: string;
     type?: string;
     locale?: string;
     redirectUrl?: string;
 }): string {
-    const { title, description, url, images, siteName, type = 'article', locale, redirectUrl } = params;
+    const { title, description, url, images, videos = [], siteName, locale, redirectUrl } = params;
+    // 有影片時 og:type 用 video.other，讓平台以影片卡片呈現。
+    const type = params.type ?? (videos.length > 0 ? 'video.other' : 'article');
     const imageTags = images.map(img => {
         const o = typeof img === 'string' ? { url: img } : img;
         const lines = [`  <meta property="og:image" content="${escapeHtml(o.url)}" />`];
@@ -34,6 +37,14 @@ export function renderOgHtml(params: {
         if (o.alt)
             lines.push(`  <meta property="og:image:alt" content="${escapeHtml(o.alt)}" />`);
         return lines.join('\n');
+    }).join('\n');
+    const videoTags = videos.map(v => {
+        const u = escapeHtml(v);
+        return [
+            `  <meta property="og:video" content="${u}" />`,
+            `  <meta property="og:video:secure_url" content="${u}" />`,
+            `  <meta property="og:video:type" content="video/mp4" />`,
+        ].join('\n');
     }).join('\n');
     const redirect = redirectUrl
         ? `\n  <meta http-equiv="refresh" content="0; url=${escapeHtml(redirectUrl)}" />`
@@ -53,7 +64,7 @@ export function renderOgHtml(params: {
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${escapeHtml(url)}" />
-${imageTags}
+${imageTags}${videoTags ? `\n${videoTags}` : ''}
   <meta property="og:type" content="${escapeHtml(type)}" />${siteNameTag}${localeTag}
 </head>
 <body>

@@ -38,13 +38,16 @@ export async function xHandler(c: Context<{ Bindings: Bindings }>) {
             ? `${result.author} (${result.username ?? ''})`
             : 'X Post';
         const description = result.content ?? '';
-        const images = result.links ?? [];
+        const media = result.media ?? [];
+        const images = media.filter(m => m.type === 'image').map(m => m.url);
+        const videos = media.filter(m => m.type === 'video').map(m => m.url);
 
         return c.html(renderOgHtml({
             title,
             description,
             url: originalUrl,
             images,
+            videos,
             siteName: 'X',
             locale: 'zh_TW',
             redirectUrl: originalUrl,

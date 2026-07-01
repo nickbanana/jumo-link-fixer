@@ -63,11 +63,12 @@ export function buildComponents(
 
     const children: ContainerChildComponent[] = [{ type: 10, content: lines.join('\n\n') }];
 
-    const images = result.links ?? [];
-    if (images.length > 0) {
+    // 圖片與影片一併放入 MediaGallery（Discord 對 mp4 URL 會嘗試以影片呈現）。
+    const media = result.media ?? [];
+    if (media.length > 0) {
         children.push({
             type: 12,
-            items: images.slice(0, 10).map((url): MediaGalleryItem => ({ media: { url } })),
+            items: media.slice(0, 10).map((m): MediaGalleryItem => ({ media: { url: m.url } })),
         });
     }
 

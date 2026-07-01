@@ -20,10 +20,13 @@ export type PreviewJob = {
     isSpoiler?: boolean;
 }
 
+// 單一媒體項目：帶類型（圖片/影片）與可存取的 URL，與 Function 端 shared.ts 保持一致。
+export type MediaItem = { type: 'image' | 'video'; url: string };
+
 export type BrowserbaseResult = {
     content?: string;
     author?: string;
     username?: string;
     likes?: number;
-    links?: string[];
+    media?: MediaItem[];
 }
