@@ -16,10 +16,7 @@
   "vars": {
     "ENVIRONMENT": "dev",
     "FUNCTION_MODE": "remote",
-    "JUMO_X_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071",
-    "JUMO_IG_FUNCTION_ID": "",
-    "JUMO_THREADS_FUNCTION_ID": "",
-    "JUMO_FB_FUNCTION_ID": "",
+    // JUMO_*_FUNCTION_ID 以 secret 管理（see scripts/update-function-ids.mjs --remote）；本地開發放在 .dev.vars
     "DISCORD_PUBLIC_KEY": "6b4c518c947bf4967671da47d65b85582150a441d36cb2f38dfc697fa63b1097",
     "DISCORD_APPLICATION_ID": "1521562879357354175"
   },
@@ -29,10 +26,7 @@
       "vars": {
         "ENVIRONMENT": "production",
         "FUNCTION_MODE": "remote",
-        "JUMO_X_FUNCTION_ID": "f390eea9-b4e0-47a3-96ab-a20ee9c28071",
-        "JUMO_IG_FUNCTION_ID": "",
-        "JUMO_THREADS_FUNCTION_ID": "",
-        "JUMO_FB_FUNCTION_ID": "",
+        // JUMO_*_FUNCTION_ID 以 secret 管理（see scripts/update-function-ids.mjs --remote）
         "DISCORD_PUBLIC_KEY": "6b4c518c947bf4967671da47d65b85582150a441d36cb2f38dfc697fa63b1097",
         "DISCORD_APPLICATION_ID": "1521562879357354175"
       },
