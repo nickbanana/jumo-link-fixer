@@ -28,5 +28,6 @@ export type BrowserbaseResult = {
     author?: string;
     username?: string;
     likes?: number;
+    permalink?: string;
     media?: MediaItem[];
 }

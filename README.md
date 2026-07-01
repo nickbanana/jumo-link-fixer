@@ -78,6 +78,10 @@ npm run cf-typegen
 2. 確認 `wrangler.jsonc` 中的 `BROWSERBASE_FUNCTION_ID` 已正確設定
 3. 部署主專案：`npm run deploy`
 
+## 已知限制
+
+- **Facebook 影片擷取相依 Stagehand 較底層的 CDP API**：Facebook 貼文影片在 DOM 僅有 blob，真正的 mp4 需靠攔截 fbcdn 網路回應取得。由於 Stagehand 的 `Page.on()` 只支援 `"console"` 事件，`jumo-link-fixer-function` 的 `platforms/facebook.ts` 改用較底層的 `page.getSessionForFrame()` / `page.sendCDP("Network.enable")` / `session.on("Network.responseReceived")` 來監聽。這些雖都在 Stagehand 的公開型別內，但比 X 使用的公開 syndication HTTP API 脆弱；**Stagehand 改版時這段最可能需要調整**。抓不到真實影片時會退回 `<video>` poster 縮圖。
+
 ## 授權
 
 MIT License
